@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .controls input[type="file"],
+        .controls input[type="text"],
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 600px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                border: 1px solid #ddd;
+                margin-bottom: 10px;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+            td:before {
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                text-align: left;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="search-bar">
+    <input type="text" name="searchInput" id="searchInput" placeholder="Search...">
+    <button type="submit">Go</button>
+  </div>
+
+  <!--  <div class="container">
+        <div class="controls">
+            <label for="fileInput">Upload CSV File:</label>
+            <input type="file" id="fileInput" accept=".csv" title="Upload CSV File">
+            <button onclick="handleFile()">Upload File</button>
+        </div>
+
+        <div class="controls">
+            <label for="inputField">Add Single Record:</label>
+            <input type="text" id="inputField" placeholder="Year, Fund, Department/Office, Cost Center, Remarks" title="Add Single Record">
+            <button onclick="addRecord()">Add Single Record</button>
+        </div>
+      -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Fund</th>
+                    <th>Department/Office</th>
+                    <th>Cost Center</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be added here dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+      let data = []; // Array to hold table data
+
+function handleFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        const fileContent = event.target.result;
+        console.log('File Content:', fileContent); // Debug: Check file content
+        const lines = fileContent.split('\n');
+        data = []; // Clear previous data
+
+        for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header line
+            const columns = lines[i].split(',');
+            if (columns.length >= 5) { // Ensure there are at least 5 columns
+                const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
+                console.log('Parsed Record:', { year, fund, departmentOffice, costCenter, remarks }); // Debug: Check parsed record
+                data.push({ year, fund, departmentOffice, costCenter, remarks });
+            }
+        }
+        saveData();
+        displayData();
+    };
+
+    reader.readAsText(file);
+}
+
+function addRecord() {
+    const inputField = document.getElementById('inputField');
+    const record = inputField.value.trim();
+    if (record !== '') {
+        const [year, fund, departmentOffice, costCenter, remarks] = record.split(',').map(item => item.trim());
+        if (year && fund && departmentOffice && costCenter && remarks) {
+            data.push({ year, fund, departmentOffice, costCenter, remarks });
+            inputField.value = '';
+            saveData();
+            displayData();
+        } else {
+            alert('Please provide values for all fields: Year, Fund, Department/Office, Cost Center, Remarks.');
+        }
+    }
+}
+
+function saveData() {
+    localStorage.setItem('tableData', JSON.stringify(data));
+}
+
+function loadData() {
+    const storedData = localStorage.getItem('tableData');
+    if (storedData) {
+        data = JSON.parse(storedData);
+    }
+    displayData();
+}
+
+function displayData() {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    data.forEach((record, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${record.year}</td>
+            <td>${record.fund}</td>
+            <td>${record.departmentOffice}</td>
+            <td>${record.costCenter}</td>
+            <td>${record.remarks}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Load data when the page loads
+document.addEventListener('DOMContentLoaded', loadData);
+
+     
+    </script>
+
+    
+    <script>
+      const searchInput = document.getElementById('searchInput');
+      const menu = document.querySelector('.menu');
+    
+      searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = document.getElementsByTagName('tr');
+    
+        for (let i = 0; i < rows.length; i++) {
+          const cells = rows[i].getElementsByTagName('td');
+          let match = false;
+    
+          for (let j = 0; j < cells.length; j++) {
+            const cellValue = cells[j].innerText.toLowerCase();
+    
+            if (cellValue.includes(searchTerm)) {
+              match = true;
+              break;
+            }
+          }
+    
+          rows[i].style.display = match ? 'table-row' : 'none';
+        }
+      });
+    
+      // Hide menu when search input is in focus
+      searchInput.addEventListener('focus', function() {
+        menu.classList.remove('active');
+      });
+    </script>  
+</body>
+</html>

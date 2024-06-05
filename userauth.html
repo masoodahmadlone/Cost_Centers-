@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Authentication</title>
+</head>
+<body>
+    <h1>User Authentication</h1>
+    
+    <!-- Login Form -->
+    <div id="loginForm">
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+    
+    <!-- Signup Form -->
+    <div id="signupForm">
+        <input type="text" id="signupUsername" placeholder="Username">
+        <input type="password" id="signupPassword" placeholder="Password">
+        <button onclick="signup()">Signup</button>
+    </div>
+    
+    <!-- Logged In User -->
+    <div id="loggedInUser" style="display: none;">
+        <p>Welcome, <span id="userDisplay"></span>!</p>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Add Record Form -->
+    <div id="addRecordForm" style="display: none;">
+        <input type="text" id="record" placeholder="Record">
+        <button onclick="addRecord()">Add Record</button>
+    </div>
+
+    <script>
+        // Function to handle user login
+        // Function to handle user login
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    // Retrieve the stored password for the given username
+    const storedPassword = localStorage.getItem(username);
+
+    // Check if the username exists and the entered password matches the stored password
+    if (storedPassword && password === storedPassword) {
+        localStorage.setItem('loggedInUser', username);
+        showLoggedInUser();
+    } else {
+        alert('Invalid username or password');
+    }
+}
+
+
+        // Function to handle user signup
+        function signup() {
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            // Here, you would store the username/password in your database
+            // For simplicity, I'm using localStorage
+            localStorage.setItem(username, password);
+            alert('Signup successful! Please login.');
+            showLoginForm();
+        }
+
+        // Function to handle user logout
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            showLoginForm();
+        }
+
+        // Function to show logged in user
+        function showLoggedInUser() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                document.getElementById('userDisplay').textContent = loggedInUser;
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('loggedInUser').style.display = 'block';
+                document.getElementById('addRecordForm').style.display = 'block';
+            }
+        }
+
+        // Function to show login form
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loggedInUser').style.display = 'none';
+            document.getElementById('addRecordForm').style.display = 'none';
+        }
+
+        // Function to show signup form
+        function showSignupForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('loggedInUser').style.display = 'none';
+            document.getElementById('addRecordForm').style.display = 'none';
+        }
+
+        // Function to add record to localStorage
+        function addRecord() {
+            const record = document.getElementById('record').value;
+            // Here, you would store the record in your database
+            // For simplicity, I'm using localStorage
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            records.push(record);
+            localStorage.setItem('records', JSON.stringify(records));
+            alert('Record added successfully!');
+            document.getElementById('record').value = ''; // Clear input field
+        }
+
+        // Check if user is already logged in
+        showLoggedInUser();
+    </script>
+    <script>
+        // Check if the user is authenticated
+function isAuthenticated() {
+    // Check if the user's username is stored in localStorage
+    return !!localStorage.getItem('loggedInUser');
+}
+
+// Check if the user is an admin
+function isAdmin() {
+    // Check if the user's role is admin (not applicable for this example)
+    return false; // For simplicity, assume no admin role in this scenario
+}
+
+// Function to show/hide UI elements based on user authentication and role
+function toggleUIElements() {
+    if (isAuthenticated()) {
+        // Show UI elements for authenticated users
+        document.getElementById('loggedInUser').style.display = 'block';
+        document.getElementById('addRecordForm').style.display = 'block';
+
+        // Hide UI elements for guest users
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'none';
+    } else {
+        // Show login and signup forms for guest users
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('signupForm').style.display = 'block';
+
+        // Hide UI elements for authenticated users
+        document.getElementById('loggedInUser').style.display = 'none';
+        document.getElementById('addRecordForm').style.display = 'none';
+    }
+}
+
+// Function to display table records
+function displayTableRecords() {
+    // Code to display table records goes here
+    // For simplicity, assume all users can view the table records
+}
+
+// Call the toggleUIElements function when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    toggleUIElements();
+    displayTableRecords();
+});
+
+    </script>
+</body>
+</html>
