@@ -78,9 +78,14 @@
 </head>
 <body>
   <div class="search-bar">
-    <input type="text" name="searchInput" id="searchInput" placeholder="Search...">
+      <input type="text" id="searchInput1" placeholder="Search Funds...">
+    <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
     <button type="submit">Go</button>
   </div>
+     <input type="text" id="searchInput1" placeholder="Search Funds...">
+    <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
+
+    
    <!--
     <div class="container">
         <div class="controls">
@@ -191,36 +196,51 @@ document.addEventListener('DOMContentLoaded', loadData);
      
     </script>
 
-    
-    <script>
-      const searchInput = document.getElementById('searchInput');
-      const menu = document.querySelector('.menu');
-    
-      searchInput.addEventListener('input', function() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const rows = document.getElementsByTagName('tr');
-    
-        for (let i = 0; i < rows.length; i++) {
-          const cells = rows[i].getElementsByTagName('td');
-          let match = false;
-    
-          for (let j = 0; j < cells.length; j++) {
-            const cellValue = cells[j].innerText.toLowerCase();
-    
-            if (cellValue.includes(searchTerm)) {
-              match = true;
-              break;
-            }
-          }
-    
-          rows[i].style.display = match ? 'table-row' : 'none';
+      <script>
+        const searchInput1 = document.getElementById('searchInput1');
+        const searchInput2 = document.getElementById('searchInput2');
+        const menu = document.querySelector('.menu');
+        const rows = document.querySelectorAll('#dataTable tbody tr');
+
+        let filteredRows = [];
+
+        function filterRows(input, columnIndex) {
+            const searchTerm = input.value.toLowerCase();
+            return Array.from(rows).filter(row => {
+                const cellValue = row.getElementsByTagName('td')[columnIndex].innerText.toLowerCase();
+                return cellValue.includes(searchTerm);
+            });
         }
-      });
-    
-      // Hide menu when search input is in focus
-      searchInput.addEventListener('focus', function() {
-        menu.classList.remove('active');
-      });
-    </script>  
+
+        function displayRows(rowsToShow) {
+            rows.forEach(row => {
+                row.style.display = 'none';
+            });
+            rowsToShow.forEach(row => {
+                row.style.display = 'table-row';
+            });
+        }
+
+        searchInput1.addEventListener('input', function() {
+            filteredRows = filterRows(searchInput1, 0); // Filter by the 'Fund' column
+            displayRows(filteredRows);
+            searchInput2.value = ''; // Clear the second search input when the fund search changes
+        });
+
+        searchInput2.addEventListener('input', function() {
+            const costCenterRows = filterRows(searchInput2, 1); // Filter by the 'Cost Center' column within the filtered funds
+            const finalRows = filteredRows.filter(row => costCenterRows.includes(row));
+            displayRows(finalRows);
+        });
+
+        // Hide menu when search input is in focus
+        searchInput1.addEventListener('focus', function() {
+            menu.classList.remove('active');
+        });
+
+        searchInput2.addEventListener('focus', function() {
+            menu.classList.remove('active');
+        });
+    </script>
 </body>
 </html>
