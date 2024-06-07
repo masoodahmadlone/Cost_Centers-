@@ -182,7 +182,8 @@
             const searchInput2 = document.getElementById('searchInput2');
             const generalSearchInput = document.getElementById('generalSearchInput');
 
-            let filteredRows = [];
+            let filteredRows = Array.from(rows);
+            let costCenterFilteredRows = Array.from(rows);
 
             function filterRows(input, columnIndex) {
                 const searchTerm = input.value.toLowerCase();
@@ -192,9 +193,9 @@
                 });
             }
 
-            function filterAllColumns(input) {
+            function filterAllColumns(input, rowsToFilter) {
                 const searchTerm = input.value.toLowerCase();
-                return Array.from(rows).filter(row => {
+                return rowsToFilter.filter(row => {
                     return Array.from(row.getElementsByTagName('td')).some(td => td.innerText.toLowerCase().includes(searchTerm));
                 });
             }
@@ -210,23 +211,22 @@
 
             searchInput1.addEventListener('input', function() {
                 filteredRows = filterRows(searchInput1, 1); // Filter by the 'Fund' column (index 1)
+                costCenterFilteredRows = filteredRows; // Update cost center filtered rows to match fund filtered rows
                 displayRows(filteredRows);
                 searchInput2.value = ''; // Clear the second search input when the fund search changes
                 generalSearchInput.value = ''; // Clear the general search input when the fund search changes
             });
 
             searchInput2.addEventListener('input', function() {
-                const costCenterRows = filterRows(searchInput2, 3); // Filter by the 'Cost Center' column (index 3)
-                const finalRows = filteredRows.filter(row => costCenterRows.includes(row));
+                costCenterFilteredRows = filterRows(searchInput2, 3); // Filter by the 'Cost Center' column (index 3)
+                const finalRows = filteredRows.filter(row => costCenterFilteredRows.includes(row));
                 displayRows(finalRows);
                 generalSearchInput.value = ''; // Clear the general search input when the cost center search changes
             });
 
             generalSearchInput.addEventListener('input', function() {
-                const allColumnRows = filterAllColumns(generalSearchInput);
-                displayRows(allColumnRows);
-                searchInput1.value = ''; // Clear the fund search input when the general search changes
-                searchInput2.value = ''; // Clear the cost center search input when the general search changes
+                const finalRows = filterAllColumns(generalSearchInput, costCenterFilteredRows);
+                displayRows(finalRows);
             });
         }
 
