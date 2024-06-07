@@ -77,28 +77,13 @@
     </style>
 </head>
 <body>
-    
-  <div class="search-bar">
-      <input type="text" id="searchInput1" placeholder="Search Funds...">
-    <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
-    <button type="submit">Go</button>
-  </div>
-    
-   <!--
+    <div class="search-bar">
+        <input type="text" id="searchInput1" placeholder="Search Funds...">
+        <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
+        <button type="submit">Go</button>
+    </div>
     <div class="container">
-        <div class="controls">
-            <label for="fileInput">Upload CSV File:</label>
-            <input type="file" id="fileInput" accept=".csv" title="Upload CSV File">
-            <button onclick="handleFile()">Upload File</button>
-        </div>
- 
-        <div class="controls">
-            <label for="inputField">Add Single Record:</label>
-            <input type="text" id="inputField" placeholder="Year, Fund, Department/Office, Cost Center, Remarks" title="Add Single Record">
-            <button onclick="addRecord()">Add Single Record</button>
-        </div>
-    -->
-        <table>
+        <table id="dataTable">
             <thead>
                 <tr>
                     <th>Year</th>
@@ -115,130 +100,120 @@
     </div>
 
     <script>
-      let data = []; // Array to hold table data
+        let data = []; // Array to hold table data
 
-function handleFile() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    const reader = new FileReader();
+        function handleFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const reader = new FileReader();
 
-    reader.onload = function(event) {
-        const fileContent = event.target.result;
-        console.log('File Content:', fileContent); // Debug: Check file content
-        const lines = fileContent.split('\n');
-        data = []; // Clear previous data
+            reader.onload = function(event) {
+                const fileContent = event.target.result;
+                const lines = fileContent.split('\n');
+                data = []; // Clear previous data
 
-        for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header line
-            const columns = lines[i].split(',');
-            if (columns.length >= 5) { // Ensure there are at least 5 columns
-                const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
-                console.log('Parsed Record:', { year, fund, departmentOffice, costCenter, remarks }); // Debug: Check parsed record
-                data.push({ year, fund, departmentOffice, costCenter, remarks });
+                for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header line
+                    const columns = lines[i].split(',');
+                    if (columns.length >= 5) { // Ensure there are at least 5 columns
+                        const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
+                        data.push({ year, fund, departmentOffice, costCenter, remarks });
+                    }
+                }
+                saveData();
+                displayData();
+            };
+
+            reader.readAsText(file);
+        }
+
+        function addRecord() {
+            const inputField = document.getElementById('inputField');
+            const record = inputField.value.trim();
+            if (record !== '') {
+                const [year, fund, departmentOffice, costCenter, remarks] = record.split(',').map(item => item.trim());
+                if (year && fund && departmentOffice && costCenter && remarks) {
+                    data.push({ year, fund, departmentOffice, costCenter, remarks });
+                    inputField.value = '';
+                    saveData();
+                    displayData();
+                } else {
+                    alert('Please provide values for all fields: Year, Fund, Department/Office, Cost Center, Remarks.');
+                }
             }
         }
-        saveData();
-        displayData();
-    };
 
-    reader.readAsText(file);
-}
+        function saveData() {
+            localStorage.setItem('tableData', JSON.stringify(data));
+        }
 
-function addRecord() {
-    const inputField = document.getElementById('inputField');
-    const record = inputField.value.trim();
-    if (record !== '') {
-        const [year, fund, departmentOffice, costCenter, remarks] = record.split(',').map(item => item.trim());
-        if (year && fund && departmentOffice && costCenter && remarks) {
-            data.push({ year, fund, departmentOffice, costCenter, remarks });
-            inputField.value = '';
-            saveData();
+        function loadData() {
+            const storedData = localStorage.getItem('tableData');
+            if (storedData) {
+                data = JSON.parse(storedData);
+            }
             displayData();
-        } else {
-            alert('Please provide values for all fields: Year, Fund, Department/Office, Cost Center, Remarks.');
         }
-    }
-}
 
-function saveData() {
-    localStorage.setItem('tableData', JSON.stringify(data));
-}
+        function displayData() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
 
-function loadData() {
-    const storedData = localStorage.getItem('tableData');
-    if (storedData) {
-        data = JSON.parse(storedData);
-    }
-    displayData();
-}
+            data.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.year}</td>
+                    <td>${record.fund}</td>
+                    <td>${record.departmentOffice}</td>
+                    <td>${record.costCenter}</td>
+                    <td>${record.remarks}</td>
+                `;
+                tableBody.appendChild(row);
+            });
 
-function displayData() {
-    const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = '';
+            // Update search functionality to use the new rows
+            updateSearchRows();
+        }
 
-    data.forEach((record, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${record.year}</td>
-            <td>${record.fund}</td>
-            <td>${record.departmentOffice}</td>
-            <td>${record.costCenter}</td>
-            <td>${record.remarks}</td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
+        function updateSearchRows() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
 
-// Load data when the page loads
-document.addEventListener('DOMContentLoaded', loadData);
+            const searchInput1 = document.getElementById('searchInput1');
+            const searchInput2 = document.getElementById('searchInput2');
 
-     
-    </script>
+            let filteredRows = [];
 
-      <script>
-        const searchInput1 = document.getElementById('searchInput1');
-        const searchInput2 = document.getElementById('searchInput2');
-        const table = document.querySelector('.table');
-        const rows = document.querySelectorAll('#dataTable tbody tr');
+            function filterRows(input, columnIndex) {
+                const searchTerm = input.value.toLowerCase();
+                return Array.from(rows).filter(row => {
+                    const cellValue = row.getElementsByTagName('td')[columnIndex].innerText.toLowerCase();
+                    return cellValue.includes(searchTerm);
+                });
+            }
 
-        let filteredRows = [];
+            function displayRows(rowsToShow) {
+                rows.forEach(row => {
+                    row.style.display = 'none';
+                });
+                rowsToShow.forEach(row => {
+                    row.style.display = 'table-row';
+                });
+            }
 
-        function filterRows(input, columnIndex) {
-            const searchTerm = input.value.toLowerCase();
-            return Array.from(rows).filter(row => {
-                const cellValue = row.getElementsByTagName('td')[columnIndex].innerText.toLowerCase();
-                return cellValue.includes(searchTerm);
+            searchInput1.addEventListener('input', function() {
+                filteredRows = filterRows(searchInput1, 1); // Filter by the 'Fund' column (index 1)
+                displayRows(filteredRows);
+                searchInput2.value = ''; // Clear the second search input when the fund search changes
+            });
+
+            searchInput2.addEventListener('input', function() {
+                const costCenterRows = filterRows(searchInput2, 3); // Filter by the 'Cost Center' column (index 3)
+                const finalRows = filteredRows.filter(row => costCenterRows.includes(row));
+                displayRows(finalRows);
             });
         }
 
-        function displayRows(rowsToShow) {
-            rows.forEach(row => {
-                row.style.display = 'none';
-            });
-            rowsToShow.forEach(row => {
-                row.style.display = 'table-row';
-            });
-        }
-
-        searchInput1.addEventListener('input', function() {
-            filteredRows = filterRows(searchInput1, 0); // Filter by the 'Fund' column
-            displayRows(filteredRows);
-            searchInput2.value = ''; // Clear the second search input when the fund search changes
-        });
-
-        searchInput2.addEventListener('input', function() {
-            const costCenterRows = filterRows(searchInput2, 1); // Filter by the 'Cost Center' column within the filtered funds
-            const finalRows = filteredRows.filter(row => costCenterRows.includes(row));
-            displayRows(finalRows);
-        });
-
-        // Hide menu when search input is in focus
-        searchInput1.addEventListener('focus', function() {
-            menu.classList.remove('active');
-        });
-
-        searchInput2.addEventListener('focus', function() {
-            menu.classList.remove('active');
-        });
+        // Load data when the page loads
+        document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
