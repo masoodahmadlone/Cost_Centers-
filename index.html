@@ -9,11 +9,10 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .search-bar{
-            margin-top:25px; 
-            margin-bottom:25px; 
-           text-align: center;
-       
+        .search-bar {
+            margin-top: 25px; 
+            margin-bottom: 25px; 
+            text-align: center;
         }
         .container {
             max-width: 1000px;
@@ -165,6 +164,9 @@
 
         function saveData() {
             localStorage.setItem('tableData', JSON.stringify(data));
+            // Store the raw file content in local storage
+            const rawData = data.map(record => `${record.year},${record.fund},${record.departmentOffice},${record.costCenter},${record.remarks}`).join('\n');
+            localStorage.setItem('rawFileContent', rawData);
         }
 
         function loadData() {
