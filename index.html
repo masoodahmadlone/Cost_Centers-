@@ -88,7 +88,13 @@
         <input type="text" id="generalSearchInput" placeholder="General Search...">
         <button type="submit">Go</button>
     </div>
-
+    <!-- to add single record -->
+<div class="controls">
+            <label for="inputField">Add Single Record:</label>
+            <input type="text" id="inputField" placeholder="Year, Fund, Department/Office, Cost Center, Remarks" title="Add Single Record">
+            <button onclick="addRecord()">Add Single Record</button>
+        </div>
+    <!-- add single record end -->
     <div class="container">
         <table id="dataTable">
             <thead>
@@ -129,7 +135,30 @@
                 })
                 .catch(error => console.error('Error loading the CSV file:', error));
         }
+<!-- add single record funciton -->
+     // Add this event listener to handle adding records
+    document.getElementById('addRecordButton').addEventListener('click', function() {
+        addRecord();
+    });
 
+    function addRecord() {
+        const inputField = document.getElementById('inputField');
+        const record = inputField.value.trim();
+        if (record !== '') {
+            const [year, fund, departmentOffice, costCenter, remarks] = record.split(',').map(item => item.trim());
+            if (year && fund && departmentOffice && costCenter && remarks) {
+                data.push({ year, fund, departmentOffice, costCenter, remarks });
+                inputField.value = ''; // Clear input field
+                saveData(); // Save updated data to localStorage
+                displayData(data); // Refresh the displayed data
+            } else {
+                alert('Please provide values for all fields: Year, Fund, Department/Office, Cost Center, Remarks.');
+            }
+        } else {
+            alert('Input cannot be empty.');
+        }
+    }
+        <!-- add single record end -->
         function displayData() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
