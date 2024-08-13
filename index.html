@@ -91,84 +91,48 @@
     </div>
 
     <div class="container">
-        <div class="controls">
-            <label for="fileInput">Upload CSV File:</label>
-            <input type="file" id="fileInput" accept=".csv" title="Upload CSV File">
-            <button onclick="handleFile()">Upload File</button>
-        </div>
-  
-        <div class="controls">
-            <label for="inputField">Add Single Record:</label>
-            <input type="text" id="inputField" placeholder="Year, Fund, Department/Office, Cost Center, Remarks" title="Add Single Record">
-            <button onclick="addRecord()">Add Single Record</button>
-        </div>
-
-        <div class="container">
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Fund</th>
-                        <th>Department/Office</th>
-                        <th>Cost Center</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Rows will be added here dynamically -->
-                </tbody>
-            </table>
-        </div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Fund</th>
+                    <th>Department/Office</th>
+                    <th>Cost Center</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be added here dynamically -->
+            </tbody>
+        </table>
     </div>
 
     <script>
         let data = []; // Array to hold table data
 
-        function handleFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+        // Function to fetch and load the CSV file automatically
+        function loadCSVFile() {
+            fetch('data.csv')
+                .then(response => response.text())
+                .then(fileContent => {
+                    const lines = fileContent.split('\n');
+                    data = []; // Clear previous data
 
-            reader.onload = function(event) {
-                const fileContent = event.target.result;
-                const lines = fileContent.split('\n');
-                data = []; // Clear previous data
-
-                for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header line
-                    const columns = lines[i].split(',');
-                    if (columns.length >= 5) { // Ensure there are at least 5 columns
-                        const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
-                        data.push({ year, fund, departmentOffice, costCenter, remarks });
+                    for (let i = 1; i < lines.length; i++) { // Start from 1 to skip header line
+                        const columns = lines[i].split(',');
+                        if (columns.length >= 5) { // Ensure there are at least 5 columns
+                            const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
+                            data.push({ year, fund, departmentOffice, costCenter, remarks });
+                        }
                     }
-                }
-                saveData();
-                displayData();
-            };
-
-            reader.readAsText(file);
-        }
-
-        function addRecord() {
-            const inputField = document.getElementById('inputField');
-            const record = inputField.value.trim();
-            if (record !== '') {
-                const [year, fund, departmentOffice, costCenter, remarks] = record.split(',').map(item => item.trim());
-                if (year && fund && departmentOffice && costCenter && remarks) {
-                    data.push({ year, fund, departmentOffice, costCenter, remarks });
-                    inputField.value = '';
                     saveData();
                     displayData();
-                } else {
-                    alert('Please provide values for all fields: Year, Fund, Department/Office, Cost Center, Remarks.');
-                }
-            }
+                })
+                .catch(error => console.error('Error loading the CSV file:', error));
         }
 
         function saveData() {
             localStorage.setItem('tableData', JSON.stringify(data));
-            // Store the raw file content in local storage
-            const rawData = data.map(record => `${record.year},${record.fund},${record.departmentOffice},${record.costCenter},${record.remarks}`).join('\n');
-            localStorage.setItem('rawFileContent', rawData);
         }
 
         function loadData() {
@@ -176,20 +140,7 @@
             if (storedData) {
                 data = JSON.parse(storedData);
             } else {
-                // Load from raw file content if available
-                const rawFileContent = localStorage.getItem('rawFileContent');
-                if (rawFileContent) {
-                    const lines = rawFileContent.split('\n');
-                    data = []; // Clear previous data
-
-                    for (let i = 0; i < lines.length; i++) {
-                        const columns = lines[i].split(',');
-                        if (columns.length >= 5) { // Ensure there are at least 5 columns
-                            const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
-                            data.push({ year, fund, departmentOffice, costCenter, remarks });
-                        }
-                    }
-                }
+                loadCSVFile(); // Load CSV file if no data in localStorage
             }
             displayData();
         }
@@ -198,7 +149,7 @@
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
 
-            data.forEach((record, index) => {
+            data.forEach((record) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${record.year}</td>
