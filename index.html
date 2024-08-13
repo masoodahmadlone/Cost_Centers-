@@ -110,9 +110,11 @@
     <script>
         let data = []; // Array to hold table data
 
-        // Function to fetch and load the CSV file automatically
-        function loadCSVFile() {
-            fetch('DDOS(F).csv')
+        // Function to fetch and load the CSV file from GitHub
+        function loadCSVFileFromGitHub() {
+            const githubCSVUrl = 'DDOS(F).csv'; // Replace with your URL
+
+            fetch(githubCSVUrl)
                 .then(response => response.text())
                 .then(fileContent => {
                     const lines = fileContent.split('\n');
@@ -125,24 +127,9 @@
                             data.push({ year, fund, departmentOffice, costCenter, remarks });
                         }
                     }
-                    saveData();
                     displayData();
                 })
                 .catch(error => console.error('Error loading the CSV file:', error));
-        }
-
-        function saveData() {
-            localStorage.setItem('tableData', JSON.stringify(data));
-        }
-
-        function loadData() {
-            const storedData = localStorage.getItem('tableData');
-            if (storedData) {
-                data = JSON.parse(storedData);
-            } else {
-                loadCSVFile(); // Load CSV file if no data in localStorage
-            }
-            displayData();
         }
 
         function displayData() {
@@ -221,7 +208,7 @@
         }
 
         // Load data when the page loads
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', loadCSVFileFromGitHub);
     </script>
 </body>
 </html>
