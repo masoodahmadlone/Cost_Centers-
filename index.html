@@ -82,13 +82,13 @@
     </style>
 </head>
 <body>
- <div class="search-bar">
+   <div class="search-bar">
         <input type="text" id="searchInput1" placeholder="Search Funds...">
         <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
         <input type="text" id="generalSearchInput" placeholder="General Search...">
         <button type="submit">Go</button>
     </div>
-  
+
     <div class="container">
         <table id="dataTable">
             <thead>
@@ -112,6 +112,7 @@
         // Function to fetch and load the CSV file from GitHub
         function loadCSVFileFromGitHub() {
             const githubCSVUrl = 'https://raw.githubusercontent.com/masoodahmadlone/Cost_Centers-/main/DDOS(F).csv';
+
             fetch(githubCSVUrl)
                 .then(response => response.text())
                 .then(fileContent => {
@@ -130,25 +131,26 @@
                 .catch(error => console.error('Error loading the CSV file:', error));
         }
 
+        function displayData() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
 
-    function addRecord() {
-        const inputField = document.getElementById('inputField');
-        const record = inputField.value.trim();
-        if (record !== '') {
-            const [year, fund, departmentOffice, costCenter, remarks] = record.split(',').map(item => item.trim());
-            if (year && fund && departmentOffice && costCenter && remarks) {
-                data.push({ year, fund, departmentOffice, costCenter, remarks });
-                inputField.value = ''; // Clear input field
-                saveData(); // Save updated data to localStorage
-                displayData(data); // Refresh the displayed data
-            } else {
-                alert('Please provide values for all fields: Year, Fund, Department/Office, Cost Center, Remarks.');
-            }
-        } else {
-            alert('Input cannot be empty.');
+            data.forEach((record) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.year}</td>
+                    <td>${record.fund}</td>
+                    <td>${record.departmentOffice}</td>
+                    <td>${record.costCenter}</td>
+                    <td>${record.remarks}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Update search functionality to use the new rows
+            updateSearchRows();
         }
-    }
-      
+
         function updateSearchRows() {
             const rows = document.querySelectorAll('#dataTable tbody tr');
 
