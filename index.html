@@ -130,18 +130,26 @@
                 })
                 .catch(error => console.error('Error loading the CSV file:', error));
         }
-        function filterData(data, searchTerm, columnIndex) {
-                    const term = searchTerm.toLowerCase();
-                    return data.filter(row => {
-                        if (columnIndex === -1) {
-                            // Search in all columns
-                            return Object.values(row).some(value => value.toLowerCase().includes(term));
-                        } else {
-                            // Search in a specific column
-                            return Object.values(row)[columnIndex].toLowerCase().includes(term);
-                        }
-                    });
-                }
+         function displayData(filteredData) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            filteredData.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td> <!-- Line number -->
+                    <td>${record.year}</td>
+                    <td>${record.fund}</td>
+                    <td>${record.departmentOffice}</td>
+                    <td>${record.costCenter}</td>
+                    <td>${record.remarks}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Update search functionality to use the new rows
+            updateSearchRows(filteredData);
+        }
         function displayData() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
