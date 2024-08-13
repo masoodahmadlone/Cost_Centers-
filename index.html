@@ -82,13 +82,14 @@
     </style>
 </head>
 <body>
+ <body>
     <div class="search-bar">
         <input type="text" id="searchInput1" placeholder="Search Funds...">
         <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
         <input type="text" id="generalSearchInput" placeholder="General Search...">
         <button type="submit">Go</button>
     </div>
-<!--
+
     <div class="container">
         <div class="controls">
             <label for="fileInput">Upload CSV File:</label>
@@ -101,22 +102,23 @@
             <input type="text" id="inputField" placeholder="Year, Fund, Department/Office, Cost Center, Remarks" title="Add Single Record">
             <button onclick="addRecord()">Add Single Record</button>
         </div>
-    -->
-    <div class="container">
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>Year</th>
-                    <th>Fund</th>
-                    <th>Department/Office</th>
-                    <th>Cost Center</th>
-                    <th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- Rows will be added here dynamically -->
-            </tbody>
-        </table>
+
+        <div class="container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Fund</th>
+                        <th>Department/Office</th>
+                        <th>Cost Center</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -173,6 +175,21 @@
             const storedData = localStorage.getItem('tableData');
             if (storedData) {
                 data = JSON.parse(storedData);
+            } else {
+                // Load from raw file content if available
+                const rawFileContent = localStorage.getItem('rawFileContent');
+                if (rawFileContent) {
+                    const lines = rawFileContent.split('\n');
+                    data = []; // Clear previous data
+
+                    for (let i = 0; i < lines.length; i++) {
+                        const columns = lines[i].split(',');
+                        if (columns.length >= 5) { // Ensure there are at least 5 columns
+                            const [year, fund, departmentOffice, costCenter, remarks] = columns.map(column => column.trim());
+                            data.push({ year, fund, departmentOffice, costCenter, remarks });
+                        }
+                    }
+                }
             }
             displayData();
         }
