@@ -82,8 +82,7 @@
     </style>
 </head>
 <body>
- <body>
-    <div class="search-bar">
+<div class="search-bar">
         <input type="text" id="searchInput1" placeholder="Search Funds...">
         <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
         <input type="text" id="generalSearchInput" placeholder="General Search...">
@@ -112,7 +111,7 @@
 
         // Function to fetch and load the CSV file from GitHub
         function loadCSVFileFromGitHub() {
-            const githubCSVUrl = 'https://github.com/masoodahmadlone/Cost_Centers-/blob/main/DDOS(F).csv'; // Replace with your URL
+            const githubCSVUrl = 'https://raw.githubusercontent.com/masoodahmadlone/Cost_Centers-/main/DDOS(F).csv';
 
             fetch(githubCSVUrl)
                 .then(response => response.text())
