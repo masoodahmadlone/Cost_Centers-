@@ -88,15 +88,7 @@
         <input type="text" id="generalSearchInput" placeholder="General Search...">
         <button type="submit">Go</button>
     </div>
-    <!-- to add single record -->
-    <!--
-<div class="controls">
-            <label for="inputField">Add Single Record:</label>
-            <input type="text" id="inputField" placeholder="Year, Fund, Department/Office, Cost Center, Remarks" title="Add Single Record">
-            <button onclick="addRecord()">Add Single Record</button>
-        </div>
-    -->
-    <!-- add single record end -->
+  
     <div class="container">
         <table id="dataTable">
             <thead>
@@ -160,27 +152,7 @@
             alert('Input cannot be empty.');
         }
     }
-        <!-- add single record end -->
-        function displayData() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-
-            data.forEach((record) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${record.year}</td>
-                    <td>${record.fund}</td>
-                    <td>${record.departmentOffice}</td>
-                    <td>${record.costCenter}</td>
-                    <td>${record.remarks}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // Update search functionality to use the new rows
-            updateSearchRows();
-        }
-
+      
         function updateSearchRows() {
             const rows = document.querySelectorAll('#dataTable tbody tr');
 
