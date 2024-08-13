@@ -82,7 +82,7 @@
     </style>
 </head>
 <body>
- <div class="search-bar">
+  <div class="search-bar">
         <input type="text" id="searchInput1" placeholder="Search Funds...">
         <input type="text" id="searchInput2" placeholder="Search Cost Centers...">
         <input type="text" id="generalSearchInput" placeholder="General Search...">
@@ -93,7 +93,7 @@
         <table id="dataTable">
             <thead>
                 <tr>
-                     <th>Line No</th>
+                    <th>Line No</th>
                     <th>Year</th>
                     <th>Fund</th>
                     <th>Department/Office</th>
@@ -112,7 +112,7 @@
 
         // Function to fetch and load the CSV file from GitHub
         function loadCSVFileFromGitHub() {
-            const githubCSVUrl = 'https://github.com/masoodahmadlone/Cost_Centers-/blob/main/DDOS(F).csv';
+            const githubCSVUrl = 'https://raw.githubusercontent.com/masoodahmadlone/Cost_Centers-/main/DDOS(F).csv';
 
             fetch(githubCSVUrl)
                 .then(response => response.text())
@@ -127,11 +127,12 @@
                             data.push({ year, fund, departmentOffice, costCenter, remarks });
                         }
                     }
-                    displayData();
+                    displayData(data); // Display all data initially
                 })
                 .catch(error => console.error('Error loading the CSV file:', error));
         }
-         function displayData(filteredData) {
+
+        function displayData(filteredData) {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
 
@@ -151,78 +152,51 @@
             // Update search functionality to use the new rows
             updateSearchRows(filteredData);
         }
-        function displayData() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
 
-            data.forEach((record) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${record.year}</td>
-                    <td>${record.fund}</td>
-                    <td>${record.departmentOffice}</td>
-                    <td>${record.costCenter}</td>
-                    <td>${record.remarks}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // Update search functionality to use the new rows
-            updateSearchRows();
-        }
-
-        function updateSearchRows() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-
+        function updateSearchRows(originalData) {
             const searchInput1 = document.getElementById('searchInput1');
             const searchInput2 = document.getElementById('searchInput2');
             const generalSearchInput = document.getElementById('generalSearchInput');
 
-            let filteredRows = Array.from(rows);
-            let costCenterFilteredRows = Array.from(rows);
+            // Initial display of all rows
+            displayData(originalData);
 
-            function filterRows(input, columnIndex) {
-                const searchTerm = input.value.toLowerCase();
-                return Array.from(rows).filter(row => {
-                    const cellValue = row.getElementsByTagName('td')[columnIndex].innerText.toLowerCase();
-                    return cellValue.includes(searchTerm);
-                });
-            }
-
-            function filterAllColumns(input, rowsToFilter) {
-                const searchTerm = input.value.toLowerCase();
-                return rowsToFilter.filter(row => {
-                    return Array.from(row.getElementsByTagName('td')).some(td => td.innerText.toLowerCase().includes(searchTerm));
-                });
-            }
-
-            function displayRows(rowsToShow) {
-                rows.forEach(row => {
-                    row.style.display = 'none';
-                });
-                rowsToShow.forEach(row => {
-                    row.style.display = 'table-row';
-                });
-            }
-
+            // Filter and display rows based on search inputs
             searchInput1.addEventListener('input', function() {
-                filteredRows = filterRows(searchInput1, 1); // Filter by the 'Fund' column (index 1)
-                costCenterFilteredRows = filteredRows; // Update cost center filtered rows to match fund filtered rows
-                displayRows(filteredRows);
-                searchInput2.value = ''; // Clear the second search input when the fund search changes
-                generalSearchInput.value = ''; // Clear the general search input when the fund search changes
+                const filteredRows = filterData(originalData, searchInput1.value, 1); // Filter by 'Fund' column
+                displayData(filteredRows);
+                resetSearchInputsExcept(searchInput1);
             });
 
             searchInput2.addEventListener('input', function() {
-                costCenterFilteredRows = filterRows(searchInput2, 3); // Filter by the 'Cost Center' column (index 3)
-                const finalRows = filteredRows.filter(row => costCenterFilteredRows.includes(row));
-                displayRows(finalRows);
-                generalSearchInput.value = ''; // Clear the general search input when the cost center search changes
+                const filteredRows = filterData(originalData, searchInput2.value, 3); // Filter by 'Cost Center' column
+                displayData(filteredRows);
+                resetSearchInputsExcept(searchInput2);
             });
 
             generalSearchInput.addEventListener('input', function() {
-                const finalRows = filterAllColumns(generalSearchInput, costCenterFilteredRows);
-                displayRows(finalRows);
+                const filteredRows = filterData(originalData, generalSearchInput.value, -1); // Filter all columns
+                displayData(filteredRows);
+            });
+        }
+
+        function filterData(data, searchTerm, columnIndex) {
+            const term = searchTerm.toLowerCase();
+            return data.filter(row => {
+                if (columnIndex === -1) {
+                    // Search in all columns
+                    return Object.values(row).some(value => value.toLowerCase().includes(term));
+                } else {
+                    // Search in a specific column
+                    return Object.values(row)[columnIndex].toLowerCase().includes(term);
+                }
+            });
+        }
+
+        function resetSearchInputsExcept(excludedInput) {
+            const inputs = [document.getElementById('searchInput1'), document.getElementById('searchInput2'), document.getElementById('generalSearchInput')];
+            inputs.forEach(input => {
+                if (input !== excludedInput) input.value = ''; // Clear other inputs
             });
         }
 
