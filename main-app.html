@@ -1,0 +1,171 @@
+<!-- main-app.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <title>Budget App</title>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="nav-container">
+    <div class="navbar">
+      <a href="#" class="logo">FDGB</a>
+      <ul class="nav-menu">
+        <li><a href="#" class="nav-link">Home</a></li>
+        <li><a href="#" class="nav-link">Fund Centers</a></li>
+        <li><a href="#" class="nav-link">Detail Object</a></li>
+        <li><a href="#" id="logout" class="nav-link">Logout</a></li>
+      </ul>
+      <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input type="text" id="searchInput1" placeholder="Search Funds..." />
+    <input type="text" id="searchInput2" placeholder="Search Cost Centers..." />
+    <input type="text" id="generalSearchInput" placeholder="General Search..." />
+   <!-- <button id="searchBtn">Go</button> -->
+  </div>
+
+  <!-- Table -->
+  <div class="container">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Fund</th>
+          <th>Department/Office</th>
+          <th>Cost Center</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- Data will be injected dynamically -->
+      </tbody>
+    </table>
+  </div>
+  <script>
+
+    // Redirect if not logged in
+if (!sessionStorage.getItem("loggedInUser")) {
+  alert("Please login to access the application.");
+  window.location.href = "index.html";
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("logout");
+  const menuToggle = document.querySelector(".menu-toggle");
+  const navMenu = document.querySelector(".nav-menu");
+  const tableBody = document.getElementById("tableBody");
+
+  const searchInput1 = document.getElementById("searchInput1");
+  const searchInput2 = document.getElementById("searchInput2");
+  const generalSearchInput = document.getElementById("generalSearchInput");
+
+  // ========== Navigation Toggle ==========
+  if (menuToggle && navMenu) {
+    menuToggle.addEventListener("click", () => {
+      const active = navMenu.classList.toggle("active");
+      menuToggle.textContent = active ? "✕" : "☰";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        navMenu.classList.remove("active");
+        menuToggle.textContent = "☰";
+      }
+    });
+  }
+
+  // ========== Logout ==========
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    });
+  }
+
+  // ========== Load and Populate Table ==========
+  fetch("https://raw.githubusercontent.com/masoodahmadlone/Cost_Centers-/main/DDOS(F).csv")
+    .then((res) => res.text())
+    .then((text) => {
+      const data = text.split("\n").slice(1).map((line) => {
+        const [year, fund, departmentOffice, costCenter, remarks] = line.split(",").map(col => col.trim());
+        return { year, fund, departmentOffice, costCenter, remarks };
+      }).filter(item => item.costCenter);
+
+      const fragment = document.createDocumentFragment();
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        [row.year, row.fund, row.departmentOffice, row.costCenter, row.remarks].forEach(text => {
+          const td = document.createElement("td");
+          td.textContent = text;
+          tr.appendChild(td);
+        });
+        fragment.appendChild(tr);
+      });
+
+      tableBody.innerHTML = "";
+      tableBody.appendChild(fragment);
+
+      // Attach search logic only after rows are available
+      attachSearchListeners();
+    });
+
+  // ========== Search Logic ==========
+  function attachSearchListeners() {
+    const rows = () => Array.from(document.querySelectorAll("#dataTable tbody tr"));
+
+    function filterByColumn(input, colIdx, baseRows) {
+      const term = input.value.toLowerCase().trim();
+      if (!term) return baseRows;
+      return baseRows.filter(row => row.cells[colIdx].textContent.toLowerCase().includes(term));
+    }
+
+    function filterAllColumns(input, baseRows) {
+      const term = input.value.toLowerCase().trim();
+      if (!term) return baseRows;
+      return baseRows.filter(row =>
+        Array.from(row.cells).some(cell => cell.textContent.toLowerCase().includes(term))
+      );
+    }
+
+    function displayRows(rowsToShow) {
+      rows().forEach(row => row.style.display = "none");
+      rowsToShow.forEach(row => row.style.display = "table-row");
+    }
+
+    let baseRows = rows();
+
+    searchInput1.addEventListener("input", () => {
+      let fundFiltered = filterByColumn(searchInput1, 1, baseRows);
+      let costCenterFiltered = filterByColumn(searchInput2, 3, fundFiltered);
+      let finalFiltered = filterAllColumns(generalSearchInput, costCenterFiltered);
+      displayRows(finalFiltered);
+    });
+
+    searchInput2.addEventListener("input", () => {
+      let fundFiltered = filterByColumn(searchInput1, 1, baseRows);
+      let costCenterFiltered = filterByColumn(searchInput2, 3, fundFiltered);
+      let finalFiltered = filterAllColumns(generalSearchInput, costCenterFiltered);
+      displayRows(finalFiltered);
+    });
+
+    generalSearchInput.addEventListener("input", () => {
+      let fundFiltered = filterByColumn(searchInput1, 1, baseRows);
+      let costCenterFiltered = filterByColumn(searchInput2, 3, fundFiltered);
+      let finalFiltered = filterAllColumns(generalSearchInput, costCenterFiltered);
+      displayRows(finalFiltered);
+    });
+  }
+});
+</script>
+
+  
+</body>
+</html>

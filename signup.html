@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signup - Budget App</title>
+  <style>
+    body { font-family: Arial; }
+    .container { max-width: 400px; margin: 80px auto; padding: 20px; border: 1px solid #ccc; }
+    input, button { margin: 10px 0; width: 100%; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Signup</h2>
+    <form id="signup-form">
+      <input type="text" id="new-username" placeholder="Username" required><br>
+      <input type="password" id="new-password" placeholder="Password" required><br>
+      <button type="submit">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="index.html">Login here</a></p>
+  </div>
+
+  <script>
+    document.getElementById("signup-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const username = document.getElementById("new-username").value.trim();
+      const password = document.getElementById("new-password").value.trim();
+
+      const existingUsers = JSON.parse(localStorage.getItem("localUsers") || "[]");
+
+      if (existingUsers.some(user => user.username === username)) {
+        alert("Username already taken!");
+        return;
+      }
+
+      existingUsers.push({ username, password });
+      localStorage.setItem("localUsers", JSON.stringify(existingUsers));
+
+      alert("Signup successful! Logging you in...");
+      sessionStorage.setItem("loggedInUser", username);
+      window.location.href = "main-app.html";
+    });
+  </script>
+</body>
+</html>
