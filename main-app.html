@@ -27,7 +27,9 @@
     <input type="text" id="searchInput1" placeholder="Search Funds..." />
     <input type="text" id="searchInput2" placeholder="Search Cost Centers..." />
     <input type="text" id="generalSearchInput" placeholder="General Search..." />
+    <button id="voiceSearchBtn" title="Click to speak">🎤</button>
    <!-- <button id="searchBtn">Go</button> -->
+    
   </div>
 
   <!-- Table -->
@@ -164,6 +166,87 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+    
+// ========== Voice Search Logic ==========
+const voiceSearchBtn = document.getElementById("voiceSearchBtn");
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  voiceSearchBtn.addEventListener('click', () => {
+    recognition.start();
+  });
+
+  recognition.onresult = (event) => {
+    const voiceText = event.results[0][0].transcript;
+    generalSearchInput.value = voiceText;
+
+    // Trigger the input event manually
+    const inputEvent = new Event('input', {
+      bubbles: true,
+      cancelable: true,
+    });
+    generalSearchInput.dispatchEvent(inputEvent);
+  };
+
+  recognition.onerror = (event) => {
+    alert("Voice recognition error: " + event.error);
+  };
+} else {
+  voiceSearchBtn.disabled = true;
+  voiceSearchBtn.title = "Voice search not supported in this browser.";
+}
+
+
+// Debounce function to limit rapid search calls
+function debounce(func, delay = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+}
+
+// Clean unwanted punctuation
+function cleanInput(input) {
+  return input.replace(/[.,!?;'"“”]/g, "").trim().toLowerCase();
+}
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  voiceSearchBtn.addEventListener('click', () => {
+    recognition.start();
+  });
+
+  recognition.onresult = (event) => {
+    let transcript = event.results[0][0].transcript;
+    let cleaned = cleanInput(transcript);
+
+    generalSearchInput.value = cleaned;
+
+    const inputEvent = new Event('input', { bubbles: true });
+    generalSearchInput.dispatchEvent(inputEvent);
+  };
+
+  recognition.onerror = (event) => {
+    alert("Voice recognition error: " + event.error);
+  };
+} else {
+  voiceSearchBtn.disabled = true;
+  voiceSearchBtn.title = "Voice search not supported in this browser.";
+}
+
 </script>
 <footer style="
   background-color: #f0f0f0;
